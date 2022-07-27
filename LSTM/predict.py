@@ -7,23 +7,23 @@ from sklearn.metrics import r2_score
 
 from LSTM.func import train_test_split, line_plot, build_lstm_model, prepare_data, get_data
 
+end = "2021-05-05 20:00:00"
 time_intervial = '1h'
 data_size = 500
+window_len = 5
+test_size = 0.1
 
-hist = get_data(time_intervial, data_size)
+hist = get_data(time_intervial, data_size, end)
 
 hist.to_csv("data.csv")
 print(hist.head(5))
 print(hist.size)
-# hist = pd.read_csv("data.csv")
 target_col = 'close'
-train, test = train_test_split(hist, test_size=0.2)
+train, test = train_test_split(hist, test_size)
 line_plot(train[target_col], test[target_col], 'training', 'test', title='')
 plt.show()
 
 np.random.seed(42)
-window_len = 5
-test_size = 0.1
 zero_base = True
 lstm_neurons = 100
 epochs = 20

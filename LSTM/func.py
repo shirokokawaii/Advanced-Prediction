@@ -1,4 +1,5 @@
 import json
+import time
 
 import pandas as pd
 import requests
@@ -8,11 +9,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def get_data(interval, size):
+def get_data(interval, size, end):
     endpoint = {'1d': 'https://min-api.cryptocompare.com/data/histoday',
                 '1h': 'https://min-api.cryptocompare.com/data/v2/histohour',
                 '1m': 'https://min-api.cryptocompare.com/data/v2/histominute'}
-    res = requests.get(endpoint[interval] + '?fsym=BTC&tsym=USD&limit=' + str(size))
+    Ts = time.mktime(time.strptime(end, "%Y-%m-%d %H:%M:%S"))
+    print(Ts)
+    res = requests.get(endpoint[interval] + '?fsym=BTC&tsym=USD&limit=' + str(size) + "&toTs=" + str(Ts))
     if interval != '1d':
         data = json.loads(res.content)['Data']['Data']
     else:
