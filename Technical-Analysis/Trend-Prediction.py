@@ -47,14 +47,14 @@ class Trend(object):
 
 class Predict(object):
     def __init__(self, data):
-        w1 = 0.3
+        w1 = 0.25
         w2 = 0.25
         w3 = 0.25
-        w4 = 0.2
-        k_5 = Trend(data, 5).values
-        k_10 = Trend(data, 10).values
-        k_20 = Trend(data, 20).values
-        k_40 = Trend(data, 40).values
+        w4 = 0.25
+        k_5 = Trend(data, 6).values
+        k_10 = Trend(data, 18).values
+        k_20 = Trend(data, 25).values
+        k_40 = Trend(data, 44).values
         k_average = k_5*w1 + k_10*w2 + k_20*w3 + k_40*w4
         self.values_K = k_average
         days_average = 5*w1 + 10*w2 + 20+w3 + 40*w4
@@ -66,20 +66,39 @@ class Predict(object):
 # data = np.load('hist_data.npy')
 # Predict(data)
 
-data = np.load('data,180712-190722.npy')
-correct_times = 0
-total_times = 0
-for i in range(10000):
-    randomtime = randint(50,1748)
+# Test Code: reliability of 5,10,15 and 20 days prediction
+data = np.load('2010-2022,720.npy')
+correct_times_5 = 0
+correct_times_10 = 0
+correct_times_15 = 0
+correct_times_20 = 0
+
+total_times = 1000
+len = len(data) - 44
+for i in range(total_times):
+    randomtime = randint(44,len)
     data_tem = data[randomtime-45:randomtime,:]
-    data_tem_next = data[randomtime:randomtime+20,:]
+    data_tem_next_5 = data[randomtime:randomtime+5,:]
+    data_tem_next_10 = data[randomtime:randomtime+10,:]
+    data_tem_next_15 = data[randomtime:randomtime+15,:]
+    data_tem_next_20 = data[randomtime:randomtime+20,:]
     predict_K = Predict(data_tem).values_K
-    actual_K = Trend(data_tem_next, 30).values
-    if(predict_K * actual_K > 0):
-        correct_times += 1
-    total_times += 1
-    print(total_times)
-print('The correct prediction possibility:', correct_times/total_times, sep = '')
+    actual_K_5 = Trend(data_tem_next_5, 5).values
+    actual_K_10 = Trend(data_tem_next_10, 10).values
+    actual_K_15 = Trend(data_tem_next_15, 15).values
+    actual_K_20 = Trend(data_tem_next_20, 20).values
 
-
-
+    if((predict_K * actual_K_5) >= 0):
+        correct_times_5 += 1
+    if((predict_K * actual_K_10) >= 0):
+        correct_times_10 += 1
+    if((predict_K * actual_K_15) >= 0):
+        correct_times_15 += 1
+    if((predict_K * actual_K_20) >= 0):
+        correct_times_20 += 1
+    if(i%1000==0):
+        print(i)
+print('The correct prediction possibility of 05 days:', correct_times_5/total_times, sep = '')
+print('The correct prediction possibility of 10 days:', correct_times_10/total_times, sep = '')
+print('The correct prediction possibility of 15 days:', correct_times_15/total_times, sep = '')
+print('The correct prediction possibility of 20 days:', correct_times_20/total_times, sep = '')
