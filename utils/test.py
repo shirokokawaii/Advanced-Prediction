@@ -1,8 +1,22 @@
-from utils.get_data import get_data
-from utils.get_time import get_time_from_file, get_timepoint
+import numpy as np
+import pandas as pd
 
-start = '14 Jun, 2012'
-end = '19 Jun, 2021'
-get_data(start, end, '4h', True)
-get_time_from_file('hist_data', '%Y-%m-%d %H:%M:%S')
-get_timepoint('hist_data', 5)
+from utils.get_data import get_data
+
+DIR="../data/"
+
+
+end = "2015-07-05 20:00:00"
+time_interval = '1d'
+data_size = 10
+filename = "2015-7_"+str(data_size)+"_"+time_interval
+
+hist = get_data(time_interval, data_size, end, filename)
+
+print(hist.head(5))
+print(hist.size)
+hist = pd.read_csv(DIR+filename+".csv")
+target_col = 'close'
+print(hist[target_col])
+
+

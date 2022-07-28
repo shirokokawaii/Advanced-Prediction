@@ -1,34 +1,29 @@
+import json
 import os
+import time
 
-from binance.client import Client
+import pandas as pd
+import requests
 import numpy as np
 
-DIR = "../data/hist_data"
+DIR = "../data/"
 
 
-def get_data(start, end, intervals='1d', override=False, trading_pair='BTCUSDT'):
-    keys = open('key.txt').readline()
-    print('Connecting to Client...')
-    api = Client(keys[0], keys[1])
-    print('Fetching data (may take multiple API requests)')
-    hist = api.get_historical_klines(trading_pair, intervals, start, end)
-    print('Finished.')
-    hist = np.array(hist, dtype=np.float32)
-    hist = hist[:, 0:6]
-    print("\nDatapoints:  {0}".format(hist.shape[0]))
-    print("Memory:      {0:.2f} Mb\n".format((hist.nbytes) / 1000000))
-    save_file(hist, 1, override)
-
-
-def save_file(data, count=1, override=False):
-    if override:
-        np.save(DIR, data)
+def get_data(interval, size, end, filename=""):
+    endpoint = {'1d': 'https://min-api.cryptocompare.com/data/histoday',
+                '1h': 'https://min-api.cryptocompare.com/data/v2/histohour',
+                '1m': 'https://min-api.cryptocompare.com/data/v2/histominute'}
+    Ts = time.mktime(time.strptime(end, "%Y-%m-%d %H:%M:%S"))
+    res = requests.get(endpoint[interval] + '?fsym=BTC&tsym=USD&limit=' + str(size) + "&toTs=" + str(int(Ts)))
+    if interval != '1d':
+        data = json.loads(res.content)['Data']['Data']
     else:
-        if os.path.exists(DIR + str(count) + ".npy"):
-            count += 1
-            save_file(data, count)
-        else:
-            np.save(DIR + str(count), data)
-            datas = np.load(DIR + str(count) + ".npy")
-            print('Results------')
-            print(datas)
+        data = json.loads(res.content)['Data']
+    hist = pd.DataFrame(data)
+    hist.drop(["conversionType", "conversionSymbol"], axis='columns', inplace=True)
+    hist = hist.set_index('time')
+    hist.index = pd.to_datetime(hist.index, unit='s')
+
+    if filename != "":
+        hist.to_csv(DIR + filename + ".csv")
+    return hist
