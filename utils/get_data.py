@@ -8,7 +8,6 @@ import numpy as np
 
 DIR = "../data/"
 
-
 def get_data(interval, size, end, filename=""):
     endpoint = {'1d': 'https://min-api.cryptocompare.com/data/histoday',
                 '1h': 'https://min-api.cryptocompare.com/data/v2/histohour',

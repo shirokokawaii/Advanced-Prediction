@@ -1,42 +1,45 @@
-from binance.client import Client
+import json
+import os
+import time
+
+import pandas as pd
+import requests
 import numpy as np
-np.set_printoptions(suppress=True)
-import datetime
-from time import strftime
 
-intervals = {720: '1d', 240: '4h', 60: '1h', 15: '15m', 5: '5m', 1: '1m'}
-now = datetime.datetime.now()
-before = now - datetime.timedelta(days=60)
-end = now.strftime("%d %m, %Y")
-start = before.strftime("%d %m, %Y")
-start = '01 01, 2010'
-end = '30 12, 2022'
+DIR="data/"
 
-trading_pair = 'BTCUSDT'
+def get_data(interval, size, end, filename=""):
+    endpoint = {'1d': 'https://min-api.cryptocompare.com/data/histoday',
+                '1h': 'https://min-api.cryptocompare.com/data/v2/histohour',
+                '1m': 'https://min-api.cryptocompare.com/data/v2/histominute'}
+    Ts = time.mktime(time.strptime(end, "%Y-%m-%d %H:%M:%S"))
+    res = requests.get(endpoint[interval] + '?fsym=BTC&tsym=USD&limit=' + str(size) + "&toTs=" + str(int(Ts)))
+    if interval != '1d':
+        data = json.loads(res.content)['Data']['Data']
+    else:
+        data = json.loads(res.content)['Data']
+    hist = pd.DataFrame(data)
+    hist.drop(["conversionType", "conversionSymbol"], axis='columns', inplace=True)
+    hist = hist.set_index('time')
+    hist.index = pd.to_datetime(hist.index, unit='s')
 
-# load key and secret and connect to API
-keys = open('Price-Data/keys.txt').readline()
-print('Connecting to Client...')
-api = Client(keys[0], keys[1])
+    if filename != "":
+        hist.to_csv(DIR + filename + ".csv")
+    return hist
 
-# fetch desired candles of all data
-print('Fetching data (may take multiple API requests)')
-hist = api.get_historical_klines(trading_pair, intervals[720], start, end)
-print('Finished.')
+# Here change the date range
+end = "2022-07-25 20:00:00"
+time_interval = '1d'
+data_size = 10000
+filename = "2022-7_"+str(data_size)+"_"+time_interval
 
-# create numpy object with closing prices and volume
-hist = np.array(hist, dtype=np.float32)
-#hist = hist[:, 4]
-hist = hist[:, 1:6]
+hist = get_data(time_interval, data_size, end, filename)
 
-# data information. Opening, Highest, Lowest, Closing, Volume
-print("\nDatapoints:  {0}".format(hist.shape[0]))
-print("Memory:      {0:.2f} Mb\n".format((hist.nbytes) / 1000000))
+print(hist.head(5))
+print(hist.size)
+hist = pd.read_csv(DIR+filename+".csv")
+target_col = 'close'
+print(hist[target_col])
 
-# save to file as numpy object
-np.save("hist_data", hist)
 
-#print the data
-data=np.load("hist_data.npy")
-print(data)
-print(data.shape)
+
