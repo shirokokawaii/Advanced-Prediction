@@ -2,13 +2,15 @@ import cv2
 import numpy as np
 import pandas as pd
 from random import *
+
+from regex import W
 np.set_printoptions(suppress=True)
 
 # **time,high,low,open,volumefrom,volumeto,close**
 
 class Trend(object):
     def __init__(self, data, days):
-        data = data.iloc[-days:,:]
+        data = data[-days:,:]
         self.values = self.calculate_trend(data, days)
         # print('days=',days,': k=',self.values,sep = '')
 
@@ -18,8 +20,8 @@ class Trend(object):
         ydata = []
 
         # **Save necessary data into array**
-        get_Highest_price = data.iloc[:,1]
-        get_Lowest_price = data.iloc[:,2]
+        get_Highest_price = data[:,1]
+        get_Lowest_price = data[:,2]
         # get_Average_price = (data[:,3]+data[:,6])/2
         get_price = (get_Highest_price + get_Lowest_price)/2
 
@@ -46,15 +48,11 @@ class Trend(object):
         return k
 
 class Predict(object):
-    def __init__(self, data):
-        w1 = 0.25
-        w2 = 0.25
-        w3 = 0.25
-        w4 = 0.25
-        k_1 = Trend(data, 6).values
-        k_2 = Trend(data, 18).values
-        k_3 = Trend(data, 25).values
-        k_4 = Trend(data, 44).values
+    def __init__(self, data, w1, w2, w3, w4, r1, r2, r3, r4):
+        k_1 = Trend(data, r1).values
+        k_2 = Trend(data, r2).values
+        k_3 = Trend(data, r3).values
+        k_4 = Trend(data, r4).values
         k_average = k_1*w1 + k_2*w2 + k_3*w3 + k_4*w4
         self.values_K = k_average
         # days_average = 5*w1 + 10*w2 + 20+w3 + 40*w4
@@ -68,35 +66,44 @@ class Predict(object):
 # Predict(data)
 
 # **Test Code: reliability of 5,10,15 and 20 days prediction**
-data = pd.read_csv('data/2022-7_4000_1d.csv', usecols=[0,1,2])
+# data = pd.read_csv('data/2022-7_4000_1d.csv', usecols=[0,1,2])
+data = np.load('data/hist_data.npy')
+w1 = 0.25
+w2 = 0.25
+w3 = 0.25
+w4 = 0.25
+r1 = 6
+r2 = 18
+r3 = 25
+r4 = 44
+total_times = 10000
+
 correct_times_1 = 0
 correct_times_2 = 0
 correct_times_3 = 0
 correct_times_4 = 0
-
-total_times = 1000
 len = len(data)
 
 for i in range(total_times):
-    randomtime = randint(44,len-20)
-    data_tem = data.iloc[randomtime-44:randomtime]
-    data_tem_next_1 = data.iloc[randomtime:randomtime+5]
-    data_tem_next_2 = data.iloc[randomtime:randomtime+10]
-    data_tem_next_3 = data.iloc[randomtime:randomtime+15]
-    data_tem_next_4 = data.iloc[randomtime:randomtime+20]
-    predict_K = Predict(data_tem).values_K
+    randomtime = randint(r4,len-20)
+    data_tem = data[randomtime-r4:randomtime]
+    data_tem_next_1 = data[randomtime:randomtime+5]
+    data_tem_next_2 = data[randomtime:randomtime+10]
+    data_tem_next_3 = data[randomtime:randomtime+15]
+    data_tem_next_4 = data[randomtime:randomtime+20]
+    predict_K = Predict(data_tem, w1, w2, w3, w4, r1, r2, r3, r4).values_K
     actual_K_1 = Trend(data_tem_next_1, 5).values
     actual_K_2 = Trend(data_tem_next_2, 10).values
     actual_K_3 = Trend(data_tem_next_3, 15).values
     actual_K_4 = Trend(data_tem_next_4, 20).values
 
-    if((predict_K * actual_K_1) >= 0):
+    if((predict_K * actual_K_1) > 0):
         correct_times_1 += 1
-    if((predict_K * actual_K_2) >= 0):
+    if((predict_K * actual_K_2) > 0):
         correct_times_2 += 1
-    if((predict_K * actual_K_3) >= 0):
+    if((predict_K * actual_K_3) > 0):
         correct_times_3 += 1
-    if((predict_K * actual_K_4) >= 0):
+    if((predict_K * actual_K_4) > 0):
         correct_times_4 += 1
     if(i%1000==0):
         print(i)
