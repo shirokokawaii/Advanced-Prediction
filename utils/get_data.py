@@ -1,5 +1,4 @@
 import json
-import os
 import time
 
 import pandas as pd
@@ -7,6 +6,7 @@ import requests
 import numpy as np
 
 DIR = "../data/"
+
 
 def get_data(interval, size, end, filename=""):
     endpoint = {'1d': 'https://min-api.cryptocompare.com/data/histoday',
@@ -20,9 +20,22 @@ def get_data(interval, size, end, filename=""):
         data = json.loads(res.content)['Data']
     hist = pd.DataFrame(data)
     hist.drop(["conversionType", "conversionSymbol"], axis='columns', inplace=True)
-    hist = hist.set_index('time')
-    hist.index = pd.to_datetime(hist.index, unit='s')
+    # hist = hist.set_index('time')
+    # hist.index = pd.to_datetime(hist.index, unit='s')
 
     if filename != "":
-        hist.to_csv(DIR + filename + ".csv")
+        np.save(DIR + filename, hist)
     return hist
+
+
+if __name__ == "__main__":
+    DIR = "../data/"
+
+    end = "2022-08-14 20:00:00"
+    time_interval = '1d'
+    data_size = 2000
+    filename = "2022-8_" + str(data_size) + "_" + time_interval
+
+    hist = get_data(time_interval, data_size, end, filename)
+    data = np.load(DIR + filename + ".npy")
+    print(data[0, :])

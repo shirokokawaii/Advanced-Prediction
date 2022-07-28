@@ -4,15 +4,12 @@ import pwlf
 from GPyOpt.methods import BayesianOptimization  # initialize piecewise linear fit with your x and y data
 from matplotlib import pyplot as plt
 
-DIR="../data/"
+DIR= "../../data/"
 
-filename=""
+filename="2022-8_500_1h.npy"
 
-data = pd.read_csv(DIR+filename)
-target_col = 'close'
-print(data)
-print(data[target_col])
-data = data[target_col]
+data = np.load(DIR+filename)
+data = data[:, 3]
 
 x = np.arange(0, data.size)
 y = data
