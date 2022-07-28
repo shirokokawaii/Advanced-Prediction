@@ -3,7 +3,7 @@ import pwlf
 from GPyOpt.methods import BayesianOptimization  # initialize piecewise linear fit with your x and y data
 from matplotlib import pyplot as plt
 
-data = np.load("../data/hist_data.npy")
+data = np.load("../../data/hist_data.npy")
 data = data[:, 1]
 x = np.arange(0, data.size)
 y = data
