@@ -4,7 +4,7 @@ import pandas as pd
 from random import *
 np.set_printoptions(suppress=True)
 
-#time,high,low,open,volumefrom,volumeto,close
+# **time,high,low,open,volumefrom,volumeto,close**
 
 class Trend(object):
     def __init__(self, data, days):
@@ -17,13 +17,13 @@ class Trend(object):
         xdata = []
         ydata = []
 
-            # Save necessary data into array
+        # **Save necessary data into array**
         get_Highest_price = data.iloc[:,1]
         get_Lowest_price = data.iloc[:,2]
         # get_Average_price = (data[:,3]+data[:,6])/2
         get_price = (get_Highest_price + get_Lowest_price)/2
 
-            # Change data into dot type
+        # **Change data into dot type**
         count = 0
         for element in get_price:
             xdata.append(count)
@@ -32,13 +32,10 @@ class Trend(object):
             count += 1
         count -= 1
         price = np.array(price)
-        # print(price)
         output = cv2.fitLine(price, cv2.DIST_L2, 0,  0.01, 0.01)
-
         k = output[1] / output[0]
         b = output[3] - k * output[2]
-        # print(output)
-            #draw the graph
+            #**draw the graph**
         # import matplotlib.pyplot as plt
         # plt.title(days)
         # plt.xlabel('Days')
@@ -66,27 +63,27 @@ class Predict(object):
         # print('Average days=', days_average, sep = '')
 
 
-# Load data from file
+# **Load data from file**
 # data = np.load('hist_data.npy')
 # Predict(data)
 
-# Test Code: reliability of 5,10,15 and 20 days prediction
-data = pd.read_csv('data/2022-7_4000_1d.csv')
+# **Test Code: reliability of 5,10,15 and 20 days prediction**
+data = pd.read_csv('data/2022-7_4000_1d.csv', usecols=[0,1,2])
 correct_times_1 = 0
 correct_times_2 = 0
 correct_times_3 = 0
 correct_times_4 = 0
 
-total_times = 10000
-len = len(data) - 44
+total_times = 1000
+len = len(data)
 
 for i in range(total_times):
     randomtime = randint(44,len-20)
-    data_tem = data.iloc[randomtime-44:randomtime,:]
-    data_tem_next_1 = data.iloc[randomtime:randomtime+5,:]
-    data_tem_next_2 = data.iloc[randomtime:randomtime+10,:]
-    data_tem_next_3 = data.iloc[randomtime:randomtime+15,:]
-    data_tem_next_4 = data.iloc[randomtime:randomtime+20,:]
+    data_tem = data.iloc[randomtime-44:randomtime]
+    data_tem_next_1 = data.iloc[randomtime:randomtime+5]
+    data_tem_next_2 = data.iloc[randomtime:randomtime+10]
+    data_tem_next_3 = data.iloc[randomtime:randomtime+15]
+    data_tem_next_4 = data.iloc[randomtime:randomtime+20]
     predict_K = Predict(data_tem).values_K
     actual_K_1 = Trend(data_tem_next_1, 5).values
     actual_K_2 = Trend(data_tem_next_2, 10).values
