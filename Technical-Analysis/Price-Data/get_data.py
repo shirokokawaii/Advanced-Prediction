@@ -17,7 +17,7 @@ def get_data(interval, size, end, filename=""):
     if interval != '1d':
         data = json.loads(res.content)['Data']['Data']
     else:
-        data = json.loads(res.content)['Data']
+        data = json.loads(res.content)['Data']['Data']
     hist = pd.DataFrame(data)
     hist.drop(["conversionType", "conversionSymbol"], axis='columns', inplace=True)
     hist = hist.set_index('time')
