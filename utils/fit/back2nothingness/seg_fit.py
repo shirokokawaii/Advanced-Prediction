@@ -1,13 +1,12 @@
 import numpy as np
 import pylab as pl
 from matplotlib import pyplot as plt
-from matplotlib import dates as mdates
 from scipy import optimize
-
-from utils.fit.set_data import set_data
 
 
 # def find_localminmax(window):
+from utils.get_data import set_data
+
 
 def segments_fit(X, Y, count):
     xmin = X.min()

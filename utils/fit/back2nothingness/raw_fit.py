@@ -1,11 +1,10 @@
 from scipy import optimize
 import matplotlib.pyplot as plt
 import numpy as np
-from utils.fit.set_data import set_data
-
 # x = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], dtype=float)
 # y = np.array([5, 7, 9, 11, 13, 15, 28.92, 42.81, 56.7, 70.59,
 #               84.47, 98.36, 112.25, 126.14, 140.03])
+from utils.get_data import set_data
 
 x, y = set_data()
 # 一个输入序列，4个未知参数，2个分段函数

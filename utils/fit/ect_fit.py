@@ -1,8 +1,7 @@
 import numpy as np
-import pylab as pl
 from matplotlib import pyplot as plt
 
-from utils.fit.set_data import set_data
+from utils.get_data import set_data
 
 
 def find_localminmax(X, Y, size=4):
