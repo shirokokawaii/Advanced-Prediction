@@ -11,7 +11,7 @@ def valid(w1, w2, w3, w4, r1, r2, r3, r4):
     r2 = int(r2)
     r3 = int(r3)
     r4 = int(r4)
-    data = np.load('../data/2022-8_2000_1d.npy')
+    data = np.load('../data/2022-8_2000_1h.npy')
     total_times = 4000
     correct_times_1 = 0
     correct_times_2 = 0
@@ -53,4 +53,17 @@ if __name__ == "__main__":
          'r3': (10, 40),
          'r4': (20, 50), }
     )
+
+    bo = BayesianOptimization(
+        valid,
+        {'w1': [0],
+         'w2': [0],
+         'w3': [0],
+         'w4': (0, 1),
+         'r1': (1, 10),
+         'r2': (3, 20),
+         'r3': (10, 40),
+         'r4': (20, 50), }
+    )
+
     bo.maximize()
