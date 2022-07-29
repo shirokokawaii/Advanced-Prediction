@@ -43,15 +43,16 @@ def set_data(get=False, size="2000", interval="1d", year="18", month='07', day='
         get_data(interval, size, end, filename)
 
     data = np.load(DIR + filename + '.npy')
-    v = data[:, 5]
     close = data[:, 3]
     X = np.arange(0, close.size)
-    # X = data[:, 0]
-    Y = close
+    # Y = np.append(close, data[:, 1], data[:, 2], axis=0)
+    Y = np.concatenate((data[:, 3], data[:, 1], data[:, 2]), axis=0)
+    Y = Y.reshape(3, int((len(Y) + 2) / 3))
+    print(type(Y))
     return X, Y
 
 
-def set_data_threevalue(get=False, size="2000", interval="1d", year="18", month='07', day='28'):
+def set_data_1D(get=False, size="2000", interval="1d", year="18", month='07', day='28'):
     DIR = "../data/"
     filename = f"20{year}-{month}-{day}_{size}_{interval}"
     end = f"20{year}-{month}-{day} 20:00:00"
@@ -62,10 +63,7 @@ def set_data_threevalue(get=False, size="2000", interval="1d", year="18", month=
     data = np.load(DIR + filename + '.npy')
     close = data[:, 3]
     X = np.arange(0, close.size)
-    # Y = np.append(close, data[:, 1], data[:, 2], axis=0)
-    Y = np.concatenate((data[:, 3], data[:, 1], data[:, 2]), axis=0)
-    Y = Y.reshape(3, int((len(Y)+2)/3))
-    print(type(Y))
+    Y = close
     return X, Y
 
 
@@ -80,8 +78,8 @@ if __name__ == "__main__":
     X1, Y1 = set_data(get=False, size=size, interval=interval, year=year, month=month, day=day)
     print(Y)
     print(Y1)
-    print(Y[1,:])
-    print(Y[1:3,1])
+    print(Y[1, :])
+    print(Y[1:3, 1])
 
     # time_interval = '1h'
     # data_size = 20

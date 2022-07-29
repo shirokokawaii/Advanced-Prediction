@@ -3,7 +3,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import mplfinance as mpf
 
-from utils.get_data import set_data, set_data_threevalue
+from utils.get_data import set_data
 
 
 def find_localminmax(X, Y, size=4):
@@ -144,10 +144,10 @@ if __name__ == '__main__':
     month = '07'
     day = '29'
 
-    X, Y = set_data_threevalue(get=False, size=size, interval=interval, year=year, month=month, day=day)
+    X, Y = set_data(get=True, size=size, interval=interval, year=year, month=month, day=day)
 
-    window_size = 3
-    extX, extY = find_localminmax(X, Y, window_size)
+    appro_size = 3
+    extX, extY = find_localminmax(X, Y, appro_size)
     print(extX)
     print(extY)
 
