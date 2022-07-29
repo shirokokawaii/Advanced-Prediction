@@ -80,15 +80,15 @@ class Predict(object):
 # data = pd.read_csv('data/2022-7_4000_1d.csv', usecols=[0,1,2])
 if __name__ == "__main__":
     data = np.load('../data/2022-8_2000_1d.npy')
-    w1 = 0.25
-    w2 = 0.25
-    w3 = 0.25
-    w4 = 0.25
-    r1 = 6
-    r2 = 18
-    r3 = 29
-    r4 = 45
-    total_times = 10000
+    w1 = 0
+    w2 = 0
+    w3 = 1
+    w4 = 0
+    r1 = 10
+    r2 = 15
+    r3 = 32
+    r4 = 28
+    total_times = 4000
 
     correct_times_1 = 0
     correct_times_2 = 0
@@ -134,6 +134,6 @@ if __name__ == "__main__":
     print('The correct prediction possibility of 20 days:', correct_times_4 / total_times, sep='')
     print('MSE:' + str(get_mse(records_real, records_predict, total_times)))
 
-    fig, ax = plt.subplots(1, figsize=(13, 7))
-    ax.plot(near, label='Approximation')
-    plt.show()
+    # fig, ax = plt.subplots(1, figsize=(13, 7))
+    # ax.plot(near, label='Approximation')
+    # plt.show()

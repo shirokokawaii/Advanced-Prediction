@@ -2,7 +2,6 @@ import numpy as np
 import pylab as pl
 from matplotlib import pyplot as plt
 
-
 from utils.fit.set_data import set_data
 
 
@@ -33,6 +32,7 @@ def find_localminmax(X, Y, size=4):
     extremumX, extremumY = rec_delect(extremumX, extremumY)
 
     return final_fix(X, Y, extremumX, extremumY)
+    # return rec_delect(extremumX, extremumY)
     # return extremumX, extremumY
 
 
@@ -83,7 +83,7 @@ def get_sun(Y, day=4):
     slideY = []
     count = 0
     for index in Y:
-        if count % day == 3:
+        if count % day == 1:
             slideX.append(count)
             slideY.append(index)
         count += 1
@@ -91,13 +91,15 @@ def get_sun(Y, day=4):
 
 
 if __name__ == '__main__':
-    X, Y = set_data(size='300', interval='1d', year="21")
+    X, Y = set_data(size='100', interval='1h', year="22", month='07', day='29')
 
-    window_size = 8
+    window_size = 3
 
     slideX, slideY = find_localminmax(X, Y, window_size)
-
+    #     [2, 6] [299, 600]
     # px, py = segments_fit(X, Y, 21)
+    print(slideX)
+    print(slideY)
 
     plt.plot(X, Y, "-")
     # plt.plot(px, py, "-or")

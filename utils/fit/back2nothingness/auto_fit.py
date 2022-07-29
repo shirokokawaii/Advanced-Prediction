@@ -7,8 +7,8 @@ DIR= "../../../data/"
 
 filename="2022-8_500_1h.npy"
 
-data = np.load(DIR+filename)
-data = data[:, 3]
+# data = np.load(DIR+filename)
+# data = data[:, 3]
 
 y = np.array([0.00000000e+00, 9.69801700e-03, 2.94350340e-02,
               4.39052750e-02, 5.45343950e-02, 6.74104940e-02,
