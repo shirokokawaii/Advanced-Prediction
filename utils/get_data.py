@@ -20,17 +20,22 @@ def get_data(interval, size, end, filename=""):
         data = json.loads(res.content)['Data']
     hist = pd.DataFrame(data)
     hist.drop(["conversionType", "conversionSymbol"], axis='columns', inplace=True)
-    # hist = hist.set_index('time')
-    # hist.index = pd.to_datetime(hist.index, unit='s')
-
     if filename != "":
         np.save(DIR + filename, hist)
+
+    # for new plt compatibility
+    hist['time'] = pd.to_datetime(hist['time'], unit='s')
+    head_key = ['time', 'open', 'high', 'low', 'close', 'volumefrom']
+    hist = hist[head_key]
+    hist = hist.rename(columns={'time': 'Date', 'open': 'Open', 'high': 'High', 'low': 'Low', 'close': 'Close', 'volumefrom':'Volume'})
+    hist = hist.set_index('Date')
+    hist.to_csv(f"{DIR}csv/{filename}.csv")
     return hist
 
 
 if __name__ == "__main__":
-    time_interval = '1h'
-    data_size = 2000
+    time_interval = '1d'
+    data_size = 10
     year = '22'
     month = '07'
     day = '29'
@@ -38,5 +43,5 @@ if __name__ == "__main__":
     end = f"20{year}-{month}-{day} 20:00:00"
     filename = f"20{year}-{month}-{day}_{data_size}_{time_interval}"
     hist = get_data(time_interval, data_size, end, filename)
-    data = np.load(DIR + filename + ".npy")
-    print(data[0, :])
+    # data = np.load(DIR + filename + ".npy")
+    print(hist)
