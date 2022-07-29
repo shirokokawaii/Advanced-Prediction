@@ -31,10 +31,11 @@ def get_data(interval, size, end, filename=""):
 if __name__ == "__main__":
     DIR = "../data/"
 
-    end = "2022-08-14 20:00:00"
     time_interval = '1d'
-    data_size = 2000
-    filename = "2022-8_" + str(data_size) + "_" + time_interval
+    data_size = 300
+    year = 21
+    end = f"20{year}-08-14 20:00:00"
+    filename = f"20{year}-8_{data_size}_{time_interval}"
 
     hist = get_data(time_interval, data_size, end, filename)
     data = np.load(DIR + filename + ".npy")
