@@ -2,8 +2,9 @@ import cv2
 import numpy as np
 import pandas as pd
 from random import *
-
+from data.get_data import get_data
 from regex import W
+
 np.set_printoptions(suppress=True)
 
 # **time,high,low,open,volumefrom,volumeto,close**
