@@ -15,6 +15,7 @@ def get_data(interval, size, end, filename=""):
     Ts = time.mktime(time.strptime(end, "%Y-%m-%d %H:%M:%S"))
     res = requests.get(endpoint[interval] + '?fsym=BTC&tsym=USD&limit=' + str(size) + "&toTs=" + str(int(Ts)))
     if interval != '1d':
+        print(res.content)
         data = json.loads(res.content)['Data']['Data']
     else:
         data = json.loads(res.content)['Data']
@@ -48,7 +49,7 @@ def set_data(get=False, size="2000", interval="1d", year="18", month='07', day='
     # Y = np.append(close, data[:, 1], data[:, 2], axis=0)
     Y = np.concatenate((data[:, 3], data[:, 1], data[:, 2]), axis=0)
     Y = Y.reshape(3, int((len(Y) + 2) / 3))
-    print(type(Y))
+    # print(type(Y))
     return X, Y
 
 
@@ -61,6 +62,7 @@ def set_data_1D(get=False, size="2000", interval="1d", year="18", month='07', da
         get_data(interval, size, end, filename)
 
     data = np.load(DIR + filename + '.npy')
+    print(data)
     close = data[:, 3]
     X = np.arange(0, close.size)
     Y = close
@@ -74,8 +76,8 @@ if __name__ == "__main__":
     month = '06'
     day = '19'
 
-    X, Y = set_data_threevalue(get=False, size=size, interval=interval, year=year, month=month, day=day)
-    X1, Y1 = set_data(get=False, size=size, interval=interval, year=year, month=month, day=day)
+    X, Y = set_data(get=True, size=size, interval=interval, year=year, month=month, day=day)
+    X1, Y1 = set_data_1D(get=True, size=size, interval=interval, year=year, month=month, day=day)
     print(Y)
     print(Y1)
     print(Y[1, :])
