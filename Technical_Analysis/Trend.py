@@ -2,20 +2,20 @@ import cv2
 import numpy as np
 import pandas as pd
 from random import *
-from data.get_data import get_data
 from regex import W
 
 np.set_printoptions(suppress=True)
 
 # **time,high,low,open,volumefrom,volumeto,close**
 
+# Trend(data, days) return k
 class Trend(object):
     def __init__(self, data, days):
         data = data[-days:,:]
-        self.values = self.calculate_trend(data, days)
+        self.values = self.calculate_trend(data)
         # print('days=',days,': k=',self.values,sep = '')
 
-    def calculate_trend(self,data, days):
+    def calculate_trend(self,data):
         price = []
         xdata = []
         ydata = []
