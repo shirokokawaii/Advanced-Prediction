@@ -3,7 +3,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import mplfinance as mpf
 
-from utils.get_data import set_data
+from get_data import set_data
 
 
 def find_localminmax(X, Y, size=4):
