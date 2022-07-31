@@ -9,51 +9,53 @@ np.set_printoptions(suppress=True)
 # **time,high,low,open,volumefrom,volumeto,close**
 
 # Trend(data, days) return k
-class Trend(object):
-    def __init__(self, data, days):
-        data = data[-days:,:]
-        self.values = self.calculate_trend(data)
-        # print('days=',days,': k=',self.values,sep = '')
+# class Trend(object):
+#     def __init__(self, data, days):
+#         data = data[-days:,:]
+#         self.values = self.calculate_trend(data)
+#         # print('days=',days,': k=',self.values,sep = '')
 
-    def calculate_trend(self,data):
-        price = []
-        xdata = []
-        ydata = []
+def Trend(data, days):
+    data = data[-days:,:]
+    price = []
+    xdata = []
+    ydata = []
 
-        # **Save necessary data into array**
-        get_Highest_price = data[:,1]
-        get_Lowest_price = data[:,2]
-        # get_Average_price = (data[:,3]+data[:,6])/2
-        get_price = (get_Highest_price + get_Lowest_price)/2
+    # **Save necessary data into array**
+    get_Highest_price = data[:,1]
+    get_Lowest_price = data[:,2]
+    # get_Average_price = (data[:,3]+data[:,6])/2
+    get_price = (get_Highest_price + get_Lowest_price)/2
 
-        # **Change data into dot type**
-        count = 0
-        for element in get_price:
-            xdata.append(count)
-            ydata.append(element)
-            price.append([count,element])
-            count += 1
-        count -= 1
-        price = np.array(price)
-        output = cv2.fitLine(price, cv2.DIST_L2, 0,  0.01, 0.01)
-        k = output[1] / output[0]
-        b = output[3] - k * output[2]
-            #**draw the graph**
-        # import matplotlib.pyplot as plt
-        # plt.title(days)
-        # plt.xlabel('Days')
-        # plt.ylabel('Price')
-        # plt.plot(xdata, ydata)
-        # plt.plot([0,output[2],count], [b,output[3],k*count+b])
-        # plt.show()
-        return k
+    # **Change data into dot type**
+    count = 0
+    for element in get_price:
+        xdata.append(count)
+        ydata.append(element)
+        price.append([count,element])
+        count += 1
+    count -= 1
+    price = np.array(price)
+    output = cv2.fitLine(price, cv2.DIST_L2, 0,  0.01, 0.01)
+    k = output[1] / output[0]
+    # b = output[3] - k * output[2]
+
+        #**draw the graph**
+    # import matplotlib.pyplot as plt
+    # plt.title(days)
+    # plt.xlabel('Days')
+    # plt.ylabel('Price')
+    # plt.plot(xdata, ydata)
+    # plt.plot([0,output[2],count], [b,output[3],k*count+b])
+    # plt.show()
+    return k
 
 class Predict(object):
     def __init__(self, data, w1, w2, w3, w4, r1, r2, r3, r4):
-        k_1 = Trend(data, r1).values
-        k_2 = Trend(data, r2).values
-        k_3 = Trend(data, r3).values
-        k_4 = Trend(data, r4).values
+        k_1 = Trend(data, r1)
+        k_2 = Trend(data, r2)
+        k_3 = Trend(data, r3)
+        k_4 = Trend(data, r4)
         k_average = k_1*w1 + k_2*w2 + k_3*w3 + k_4*w4
         self.values_K = k_average
         # days_average = 5*w1 + 10*w2 + 20+w3 + 40*w4
