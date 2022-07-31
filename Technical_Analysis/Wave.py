@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
     range = 50
     appro_size = 4
-    interval = '1d'
+    interval = '1d' #1min, 1h, 1d
     year = now.strftime('%y')
     month = now.strftime('%m')
     day = now.strftime('%d')
