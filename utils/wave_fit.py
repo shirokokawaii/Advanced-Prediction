@@ -36,6 +36,7 @@ def find_localminmax(X, Y, size=4, offset=0):
             extremumY.append(Y[0, :][-1])
 
     extremumX, extremumY = rec_delect(extremumX, extremumY)
+    extremumX, extremumY = final_fix(X, Y, extremumX, extremumY)
     return final_fix(X, Y, extremumX, extremumY)
     # return rec_delect(extremumX, extremumY)
     # return extremumX, extremumY
@@ -62,26 +63,9 @@ def rec_delect(extremumX, extremumY, count=0):
 
 
 def final_fix(X, Y, extremumX, extremumY):
-    # 所有最大值集合和最小值集合
-    maxV = Y[1, :]
-    minV = Y[2, :]
-
-    # Y = Y[0, :]
-    listMin = minV.tolist()
-    listMax = maxV.tolist()
-
-    list = Y.tolist()
     for index in range(0, len(extremumX)):
         # get both maxmin around the index
         if (index != 0) & (index != len(extremumX) - 1):
-            # tmpX = X[extremumX[index - 1]:extremumX[index + 1]]
-            if extremumX[index + 1] - extremumX[index] == 1:
-                print(f"i+1 = {extremumX[index + 1]}")
-                continue
-            if extremumX[index] == 270:
-                print()
-            if extremumX[index] == 262:
-                print()
             tmpY = Y[1:3, extremumX[index - 1] + 1:extremumX[index + 1]]
             tmpX = X[extremumX[index - 1] + 1:extremumX[index + 1]]
         elif index == 0:
@@ -95,12 +79,10 @@ def final_fix(X, Y, extremumX, extremumY):
                 extremumY[index] = min(tmpY[1])
                 tmp_list = tmpY[1].tolist()
                 extremumX[index] = tmpX[tmp_list.index(min(tmpY[1]))]
-                # extremumX[index] = X[listMin.index(min(tmpY[1]))]
             else:
                 extremumY[index] = max(tmpY[0])
                 tmp_list = tmpY[0].tolist()
                 extremumX[index] = tmpX[tmp_list.index(max(tmpY[0]))]
-                # extremumX[index] = X[listMax.index(max(tmpY[0]))]
         else:
             if extremumY[index - 1] > extremumY[index]:
                 extremumY[index] = min(tmpY[1])
@@ -155,15 +137,16 @@ def find_all(X, Y, appro_size):
     result_setX = []
     result_setY = []
     for offset in range(0, appro_size):
-        print(f"offset:{offset}")
+        # print(f"offset:{offset}")
         extX, extY = find_localminmax(X, Y, appro_size, offset)
         if len(result_setX) == 0:
+            print(f"offset:{offset}")
             result_setX.append(extX)
             result_setY.append(extY)
-            print("branch1")
-            print(result_setX[0])
+            # print("branch1")
+            # print(result_setX[0])
         else:
-            print("branch2")
+            # print("branch2")
 
             flag = False
             for i in range(len(result_setX)):
@@ -171,16 +154,17 @@ def find_all(X, Y, appro_size):
                 result_setY[i] = np.array(result_setY[i])
                 extX = np.array(extX)
                 extY = np.array(extY)
-                print(result_setX[i])
-                print(extX)
+                # print(result_setX[i])
+                # print(extX)
                 # print((result_setX[i] == extX))
                 # print((result_setX[i] == extX).all())
-                if(len(result_setX[i]) != len(extX)):
+                if (len(result_setX[i]) != len(extX)):
                     continue
                 if (result_setX[i] == extX).all():
                     flag = True
                     break
             if not flag:
+                print(f"offset:{offset}")
                 result_setX.append(extX)
                 result_setY.append(extY)
 
@@ -188,35 +172,36 @@ def find_all(X, Y, appro_size):
 
 
 if __name__ == '__main__':
-    size = 300
-    interval = '1m'
-    year = '22'
-    month = '07'
+    size = 100
+    appro_size = 5
+    interval = '1d'
+    year = '21'
+    month = '05'
     day = '26'
 
     X, Y = set_data(get=False, size=size, interval=interval, year=year, month=month, day=day)
+
     data = pd.read_csv(f'../data/csv/20{year}-{month}-{day}_{size}_{interval}.csv', index_col=0, parse_dates=True)
     data.index.name = 'Date'
 
-    appro_size = 4
-    extX, extY = find_localminmax(X, Y, appro_size)
-    # extX, extY = find_all(X, Y, appro_size)
-    # for i in range(len(extX)):
-    #     print(len(convert2line(extX[i], extY[i], X)))
-    #     apd = mpf.make_addplot(convert2line(extX[i], extY[i], X))
-    #     mpf.plot(data, type='candle', volume=True, addplot=apd)
-
+    # --draw one solution
+    # extX, extY = find_localminmax(X, Y, size=appro_size, offset=2)
     # apd = mpf.make_addplot(convert2line(extX, extY, X))
     # mpf.plot(data, type='candle', volume=True, addplot=apd)
+
+    # --draw all possible solution
+    extX, extY = find_all(X, Y, appro_size)
+    for i in range(len(extX)):
+        print(len(convert2line(extX[i], extY[i], X)))
+        apd = mpf.make_addplot(convert2line(extX[i], extY[i], X))
+        mpf.plot(data, type='candle', volume=True, addplot=apd)
 
     print(extX)
     print(extY)
 
-
-    # apd = mpf.make_addplot(convert2line(extX, extY, X))
-    # mpf.plot(data, type='candle', volume=True, addplot=apd)
-
-    mpf.plot(data, type='candle', mav=(3, 6, 9), volume=True)
+    # extX = np.array([extX, extY])
+    # extX = extX.reshape(-1, 2)
+    # print(extX)
 
     # plt.plot(X, Y[0, :], "-")
     # plt.plot(extX, extY, "-o")

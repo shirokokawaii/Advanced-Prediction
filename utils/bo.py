@@ -11,7 +11,7 @@ def valid(w1, w2, w3, w4, r1, r2, r3, r4):
     r2 = int(r2)
     r3 = int(r3)
     r4 = int(r4)
-    data = np.load('../data/2022-8_2000_1d.npy')
+    data = np.load('../data/2022-07-29_1500_1m.npy')
     total_times = 4000
     correct_times_1 = 0
     correct_times_2 = 0

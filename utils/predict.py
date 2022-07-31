@@ -79,12 +79,12 @@ class Predict(object):
 # **Test Code: reliability of 5,10,15 and 20 days prediction**
 # data = pd.read_csv('data/2022-7_4000_1d.csv', usecols=[0,1,2])
 if __name__ == "__main__":
-    data = np.load('../data/2022-8_2000_1d.npy')
-    w1 = 0
-    w2 = 0
-    w3 = 1
-    w4 = 0
-    r1 = 10
+    data = np.load('../data/2022-07-29_1500_1m.npy')
+    w1 = 0.6
+    w2 = 0.7
+    w3 = 0.5
+    w4 = 0.5
+    r1 = 2
     r2 = 15
     r3 = 32
     r4 = 28

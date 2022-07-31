@@ -35,6 +35,15 @@ def get_data(interval, size, end, filename=""):
     return hist
 
 
+def set_from_file(DIR, filename, size):
+    data = np.load(DIR + filename + '.npy')
+    close = data[-size:, 3]
+    X = np.arange(0, close.size)
+    Y = np.concatenate((data[-size:, 3], data[-size:, 1], data[-size:, 2]), axis=0)
+    Y = Y.reshape(3, int((len(Y) + 2) / 3))
+    return X, Y
+
+
 def set_data(get=False, size="2000", interval="1d", year="18", month='07', day='28'):
     DIR = "../data/"
     filename = f"20{year}-{month}-{day}_{size}_{interval}"
