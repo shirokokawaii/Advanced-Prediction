@@ -46,6 +46,7 @@ def split_interval(extX, extY, float_range):
     if len(interval_tmpX) != 0:
         interval_set.append([interval_tmpX, interval_tmpY])
     interval_set = merge(interval_set)
+    print(interval_set)
     return interval_set
 
 
@@ -75,12 +76,18 @@ def merge(sets):
     i = 0
     while i < len(sets) - 1:
         l = np.size(sets[i][0])
-        if sets[i][0][l - 2] == sets[i + 1][0][0]:
-            for j in range(2, len(sets[i + 1][0])):
-                sets[i][0].append(sets[i + 1][0][j])
-                sets[i][1].append(sets[i + 1][1][j])
-            sets.pop(i + 1)
-            i -= 1
+        for k in range(1, 3):
+            if sets[i][0][l - k] == sets[i + 1][0][0]:
+                for j in range(k, len(sets[i + 1][0])):
+                    sets[i][0].append(sets[i + 1][0][j])
+                    sets[i][1].append(sets[i + 1][1][j])
+                sets.pop(i + 1)
+            continue
+        # elif sets[i][0][l-1] == sets[i+1][0][0]:
+        #     for j in range(1, len(sets[i + 1][0])):
+        #         sets[i][0].append(sets[i + 1][0][j])
+        #         sets[i][1].append(sets[i + 1][1][j])
+        #     sets.pop(i+1)
         i += 1
     return sets
 
@@ -132,13 +139,13 @@ if __name__ == '__main__':
     DIR = "../data/"
     filename = f"20{year}-{month}-{day}_{size}_{interval}"
 
-    tmp_size = 120
-    # X, Y = set_from_file(DIR, filename, tmp_size)
-    X, Y = set_data(get=True, size=size, interval=interval, year=year, month=month, day=day)
+    tmp_size = 130
+    X, Y = set_from_file(DIR, filename, tmp_size)
+    # X, Y = set_data(get=True, size=size, interval=interval, year=year, month=month, day=day)
 
     data = pd.read_csv(f'../data/csv/20{year}-{month}-{day}_{size}_{interval}.csv', index_col=0, parse_dates=True)
     data.index.name = 'Date'
-    # data = data.iloc[-tmp_size:]
+    data = data.iloc[-tmp_size:]
 
     # --draw one solution
     extX, extY = find_localminmax(X, Y, size=appro_size, offset=0)
