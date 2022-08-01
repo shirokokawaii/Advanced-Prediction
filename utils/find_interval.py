@@ -75,13 +75,13 @@ def merge(sets):
     i = 0
     while i < len(sets) - 1:
         l = np.size(sets[i][0])
-        if sets[i][0][l-2] == sets[i + 1][0][0]:
+        if sets[i][0][l - 2] == sets[i + 1][0][0]:
             for j in range(2, len(sets[i + 1][0])):
                 sets[i][0].append(sets[i + 1][0][j])
                 sets[i][1].append(sets[i + 1][1][j])
             sets.pop(i + 1)
-            i-=1
-        i+=1
+            i -= 1
+        i += 1
     return sets
 
 
