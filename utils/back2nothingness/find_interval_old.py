@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import mplfinance as mpf
 from scipy import optimize
-from utils.get_data import set_data, set_from_file, read_data, set_XY, convert2csv
+from utils.get_data import set_data, set_from_file, read_data
 from utils.wave_fit import find_all, convert2line, find_localminmax
 
 
@@ -130,28 +130,39 @@ def line(k, b, x):
 
 
 if __name__ == '__main__':
-    # set fitting parameters
+    size = 300
     appro_size = 3
-    float_range = 0.5
-    offset = 0
+    interval = '1d'
+    year = '22'
+    month = '07'
+    day = '29'
+    DIR = "../data/"
+    filename = f"20{year}-{month}-{day}_{size}_{interval}"
 
-    # prepare data
-    data = read_data(50000, 50150)
-    X, Y = set_XY(data)
+    tmp_size = 130
 
-    # find max and min
-    extX, extY = find_localminmax(X, Y, size=appro_size, offset=offset)
+    data = read_data(50000, 50000)
+
+    X, Y = set_from_file(DIR, filename, tmp_size)
+    # X, Y = set_data(get=True, size=size, interval=interval, year=year, month=month, day=day)
+    #
+    # data = pd.read_csv(f'../data/csv/20{year}-{month}-{day}_{size}_{interval}.csv', index_col=0, parse_dates=True)
+    # data.index.name = 'Date'
+    # data = data.iloc[-tmp_size:]
+
+    # --draw one solution
+    extX, extY = find_localminmax(X, Y, size=appro_size, offset=0)
 
     # find value range
+    float_range = 0.5
     setMax, setMin = bisect(split_interval(extX, extY, float_range))
     k1, b1 = fit_line(setMax)
     k2, b2 = fit_line(setMin)
 
-    # plot
     plt.plot(X, Y[0, :], "-")
     plt.plot(extX, extY, "-o")
-    apds = [mpf.make_addplot(convert2line(extX, extY, X))]
 
+    apds = [mpf.make_addplot(convert2line(extX, extY, X))]
     for i in range(len(setMax)):
         plt.plot([setMax[i][0][0], setMax[i][-1][0]],
                  [line(k1[i], b1[i], setMax[i][0][0]), line(k1[i], b1[i], setMax[i][-1][0])], "-")
@@ -165,4 +176,4 @@ if __name__ == '__main__':
                                                    line(k2[i], b2[i], setMin[i][-1][0])], X, True)))
 
     plt.show()
-    mpf.plot(convert2csv(data), type='candle', volume=True, addplot=apds)
+    mpf.plot(data, type='candle', volume=True, addplot=apds)

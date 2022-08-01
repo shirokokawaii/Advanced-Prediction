@@ -3,7 +3,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import mplfinance as mpf
 
-from get_data import set_data
+from get_data import set_data, read_data, set_XY, convert2csv
 
 
 def find_localminmax(X, Y, size=4, offset=0):
@@ -174,41 +174,33 @@ def find_all(X, Y, appro_size):
 
 
 if __name__ == '__main__':
-    size = 2000
-    appro_size = 5
-    interval = '1h'
-    year = '22'
-    month = '08'
-    day = '01'
 
-    X, Y = set_data(get=False, size=size, interval=interval, year=year, month=month, day=day)
+    # set fitting parameters
+    appro_size = 3
+    offset = 0
 
-    data = pd.read_csv(f'../data/csv/20{year}-{month}-{day}_{size}_{interval}.csv', index_col=0, parse_dates=True)
-    data.index.name = 'Date'
+    # prepare data
+    data = read_data(50000, 50150)
+    X, Y = set_XY(data)
 
-    # --draw one solution
-    extX, extY = find_localminmax(X, Y, size=appro_size, offset=2)
+    # -- draw one solution
+    extX, extY = find_localminmax(X, Y, size=appro_size, offset=offset)
     apd = mpf.make_addplot(convert2line(extX, extY, X))
-    mpf.plot(data, type='candle', volume=True, addplot=apd)
+    mpf.plot(convert2csv(data), type='candle', volume=True, addplot=apd)
 
-    # --draw all possible solution
+    # -- draw all possible solution
     # extX, extY = find_all(X, Y, appro_size)
     # for i in range(len(extX)):
     #     print(len(convert2line(extX[i], extY[i], X)))
     #     apd = mpf.make_addplot(convert2line(extX[i], extY[i], X))
-    #     mpf.plot(data, type='candle', volume=True, addplot=apd)
+    #     mpf.plot(convert2csv(data), type='candle', volume=True, addplot=apd)
 
-    print(extX)
-    print(extY)
-
-    # extX = np.array([extX, extY])
-    # extX = extX.reshape(-1, 2)
-    # print(extX)
-
+    # -- plot by plt
     # plt.plot(X, Y[0, :], "-")
     # plt.plot(extX, extY, "-o")
     # plt.show()
 
-    # plt.plot(np.arange(0, 542), convert2line(extX[0], extY[0], X), "-")
-    # plt.plot(extX[0], extY[0], "-o")
-    # plt.show()
+    print(extX)
+    print(extY)
+
+

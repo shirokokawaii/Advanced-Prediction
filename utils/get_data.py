@@ -2,6 +2,7 @@ import datetime
 import json
 import time
 import mplfinance as mpf
+import numpy
 
 import pandas as pd
 import requests
@@ -28,6 +29,14 @@ def get_data(interval, size, end, filename=""):
     return hist
 
 
+def set_XY(nparray):
+    close = nparray[:, 3]
+    X = np.arange(0, close.size)
+    Y = np.concatenate((nparray[:, 3], nparray[:, 1], nparray[:, 2]), axis=0)
+    Y = Y.reshape(3, int((len(Y) + 2) / 3))
+    return X, Y
+
+
 def convert2csv(hist_data):
     np_to_csv = pd.DataFrame(data=hist_data)
     index = [0, 3, 1, 2, 6, 4]
@@ -39,6 +48,16 @@ def convert2csv(hist_data):
     return np_to_csv
 
 
+def read_data(start, end, interval=1, type="1h"):
+    data = np.load(f"{DIR}{type}.npy")
+    result = []
+    for i in range(start, end, interval):
+        result.append(numpy.array(data[i]))
+    result = numpy.array(result)
+    return result
+
+
+# old method
 def set_from_file(DIR, filename, size):
     data = np.load(DIR + filename + '.npy')
     close = data[-size:, 3]
@@ -48,7 +67,8 @@ def set_from_file(DIR, filename, size):
     return X, Y
 
 
-def set_data(get=False, size="2000", interval="1d", year="18", month='07', day='28'):
+# old method
+def set_data(get=False, size="50", interval="1d", year="22", month='08', day='01'):
     DIR = "../data/"
     filename = f"20{year}-{month}-{day}_{size}_{interval}"
     end = f"20{year}-{month}-{day} 20:00:00"
@@ -57,6 +77,8 @@ def set_data(get=False, size="2000", interval="1d", year="18", month='07', day='
         get_data(interval, size, end, filename)
 
     data = np.load(DIR + filename + '.npy')
+    print("oldmethod")
+    print(data)
     close = data[:, 3]
     X = np.arange(0, close.size)
     # Y = np.append(close, data[:, 1], data[:, 2], axis=0)
@@ -64,13 +86,6 @@ def set_data(get=False, size="2000", interval="1d", year="18", month='07', day='
     Y = Y.reshape(3, int((len(Y) + 2) / 3))
     # print(type(Y))
     return X, Y
-
-def read_data(start, end, interval=1, type="1h"):
-    data = np.load(f"{DIR}{type}.npy")
-    result = []
-    for i in range(start, end, interval):
-        result.append(data[i])
-    return result
 
 
 if __name__ == "__main__":
@@ -80,18 +95,6 @@ if __name__ == "__main__":
     year = '22'
     month = '08'
     day = '01'
-    # end_hour = '12:00:00'
-    # filename = f"20{year}-{month}-{day}_{size}_{interval}"
-    # end = f"20{year}-{month}-{day} {end_hour}"
-
-    # hist = get_data(interval, size, end, filename)
-    # hist = np.load(DIR + filename + ".npy")
-    # csv_data = convert2csv(hist, True, filename=filename)
-
-    # start_time = csv_data[0: 1].index
-    # current_hour = start_time.strftime('%Y-%m-%d %H:%M:%S').tolist()[0]
-    # print(current_hour)
-    # print(i)
 
     n = 2
 
@@ -106,7 +109,7 @@ if __name__ == "__main__":
         # set next time
         start_time = csv_data[0: 1].index
         print(f"start_time:{start_time}")
-        start_time = start_time-datetime.timedelta(hours=-7)
+        start_time = start_time - datetime.timedelta(hours=-7)
 
         print(f"after:{start_time}")
         current_hour = start_time.strftime('%Y-%m-%d %H:%M:%S').tolist()[0]
@@ -114,13 +117,12 @@ if __name__ == "__main__":
         filename = f"{i}_{size}_{interval}"
         print(end)
 
-
     for i in range(1, n):
         print(f"{i}base")
         if i == 1:
             base = np.load(f'{DIR}{i}.npy')
         print(base)
-        append_data = np.load(f'{DIR}{i+1}.npy')
+        append_data = np.load(f'{DIR}{i + 1}.npy')
         base = np.append(base, append_data)
         print(f"----baseshape After append:{len(base)}")
         print(base)
