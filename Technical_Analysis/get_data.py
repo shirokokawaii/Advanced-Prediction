@@ -13,7 +13,8 @@ def get_data(interval, size, end, filename=""):
                 '1h': 'https://min-api.cryptocompare.com/data/v2/histohour',
                 '1m': 'https://min-api.cryptocompare.com/data/v2/histominute'}
     Ts = time.mktime(time.strptime(end, "%Y-%m-%d %H:%M:%S"))
-    res = requests.get(endpoint[interval] + '?fsym=BTC&tsym=USD&limit=' + str(size) + "&toTs=" + str(int(Ts)))
+    # res = requests.get(endpoint[interval] + '?fsym=BTC&tsym=USD&limit=' + str(size) + "&toTs=" + str(int(Ts)))
+    res = requests.get(endpoint[interval] + '?fsym=ETH&tsym=USD&limit=' + str(size) + "&toTs=" + str(int(Ts)))
     if interval != '1d':
         data = json.loads(res.content)['Data']['Data']
     else:

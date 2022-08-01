@@ -151,7 +151,7 @@ if __name__ == '__main__':
     print(extX)
     print(extY)
 
-    data = pd.read_csv(f'../data/csv/20{year}-{month}-{day}_{size}_{interval}.csv', index_col=0, parse_dates=True)
+    data = pd.read_csv(f'data/csv/20{year}-{month}-{day}_{size}_{interval}.csv', index_col=0, parse_dates=True)
     data.index.name = 'Date'
 
     apd = mpf.make_addplot(convert2line(extX, extY, X))

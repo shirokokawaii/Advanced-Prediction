@@ -4,9 +4,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import mplfinance as mpf
 from scipy import optimize
-from sklearn.linear_model import LinearRegression
-
-from utils.back2nothingness.test import leastSquare, f_1
 from utils.get_data import set_data, set_from_file
 from utils.wave_fit import find_all, convert2line, find_localminmax
 
@@ -48,12 +45,7 @@ def split_interval(extX, extY, float_range):
 
     if len(interval_tmpX) != 0:
         interval_set.append([interval_tmpX, interval_tmpY])
-    print("before:")
-    print(interval_set)
     interval_set = merge(interval_set)
-    print("after")
-    print(interval_set)
-
     return interval_set
 
 
@@ -141,12 +133,12 @@ if __name__ == '__main__':
     filename = f"20{year}-{month}-{day}_{size}_{interval}"
 
     tmp_size = 120
-    X, Y = set_from_file(DIR, filename, tmp_size)
-    # X, Y = set_data(get=True, size=size, interval=interval, year=year, month=month, day=day)
+    # X, Y = set_from_file(DIR, filename, tmp_size)
+    X, Y = set_data(get=True, size=size, interval=interval, year=year, month=month, day=day)
 
     data = pd.read_csv(f'../data/csv/20{year}-{month}-{day}_{size}_{interval}.csv', index_col=0, parse_dates=True)
     data.index.name = 'Date'
-    data = data.iloc[-tmp_size:]
+    # data = data.iloc[-tmp_size:]
 
     # --draw one solution
     extX, extY = find_localminmax(X, Y, size=appro_size, offset=0)
@@ -159,7 +151,7 @@ if __name__ == '__main__':
 
     plt.plot(X, Y[0, :], "-")
     plt.plot(extX, extY, "-o")
-    # apds = []
+
     apds = [mpf.make_addplot(convert2line(extX, extY, X))]
     for i in range(len(setMax)):
         plt.plot([setMax[i][0][0], setMax[i][-1][0]],
