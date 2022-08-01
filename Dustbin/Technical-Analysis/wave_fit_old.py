@@ -6,8 +6,8 @@ import mplfinance as mpf
 from get_data import set_data
 
 
-def find_localminmax(X, Y, size=4, offset=0):
-    slideX, slideY = get_slice(Y[0, :], size, offset)
+def find_localminmax(X, Y, size=4):
+    slideX, slideY = get_slice(Y[0, :], size)
     extremumX = []
     extremumY = []
     # return slideX, slideY
@@ -36,14 +36,14 @@ def find_localminmax(X, Y, size=4, offset=0):
             extremumY.append(Y[0, :][-1])
 
     extremumX, extremumY = rec_delect(extremumX, extremumY)
-    extremumX, extremumY = final_fix(X, Y, extremumX, extremumY)
+    #
     return final_fix(X, Y, extremumX, extremumY)
     # return rec_delect(extremumX, extremumY)
     # return extremumX, extremumY
 
 
 def rec_delect(extremumX, extremumY, count=0):
-    if len(extremumX) <= 2:
+    if len(extremumX) <= 3:
         return extremumX, extremumY
     if count < len(extremumX) - 2:
         if extremumY[count] >= extremumY[count + 1]:
@@ -63,35 +63,39 @@ def rec_delect(extremumX, extremumY, count=0):
 
 
 def final_fix(X, Y, extremumX, extremumY):
+    # 所有最大值集合和最小值集合
+    maxV = Y[1, :]
+    minV = Y[2, :]
+
+    # Y = Y[0, :]
+    listMin = minV.tolist()
+    listMax = maxV.tolist()
+
+    list = Y.tolist()
     for index in range(0, len(extremumX)):
         # get both maxmin around the index
         if (index != 0) & (index != len(extremumX) - 1):
-            tmpY = Y[1:3, extremumX[index - 1] + 1:extremumX[index + 1]]
-            tmpX = X[extremumX[index - 1] + 1:extremumX[index + 1]]
+            # tmpX = X[extremumX[index - 1]:extremumX[index + 1]]
+            tmpY = Y[1:3, extremumX[index - 1]+1:extremumX[index + 1]]
         elif index == 0:
             tmpY = Y[1:3, :extremumX[index + 1]]
-            tmpX = X[:extremumX[index + 1]]
         elif index == len(extremumX) - 1:
-            tmpY = Y[1:3, extremumX[index - 1] + 1:]
-            tmpX = X[extremumX[index - 1] + 1:]
+            tmpY = Y[1:3, extremumX[index - 1]+1:]
         if index < len(extremumX) - 1:
             if extremumY[index + 1] > extremumY[index]:
                 extremumY[index] = min(tmpY[1])
-                tmp_list = tmpY[1].tolist()
-                extremumX[index] = tmpX[tmp_list.index(min(tmpY[1]))]
+                extremumX[index] = X[listMin.index(min(tmpY[1]))]
             else:
                 extremumY[index] = max(tmpY[0])
-                tmp_list = tmpY[0].tolist()
-                extremumX[index] = tmpX[tmp_list.index(max(tmpY[0]))]
+                extremumX[index] = X[listMax.index(max(tmpY[0]))]
         else:
             if extremumY[index - 1] > extremumY[index]:
                 extremumY[index] = min(tmpY[1])
-                tmp_list = tmpY[1].tolist()
-                extremumX[index] = tmpX[tmp_list.index(min(tmpY[1]))]
+                extremumX[index] = X[listMin.index(min(tmpY[1]))]
             else:
                 extremumY[index] = max(tmpY[0])
-                tmp_list = tmpY[0].tolist()
-                extremumX[index] = tmpX[tmp_list.index(max(tmpY[0]))]
+                extremumX[index] = X[listMax.index(max(tmpY[0]))]
+
     return extremumX, extremumY
 
 
@@ -101,19 +105,19 @@ def get_tmp(index, X, Y, size):
     return resX, rexY
 
 
-def get_slice(Y, slice_size, offset=0):
+def get_slice(Y, slice_size):
     slideX = []
     slideY = []
     count = 0
     for index in Y:
-        if count % slice_size == offset:
+        if count % slice_size == 1:
             slideX.append(count)
             slideY.append(index)
         count += 1
     return slideX, slideY
 
 
-def convert2line(extX, extY, X, narray=False):
+def convert2line(extX, extY, X):
     result = []
     for count in range(0, len(extX)):
         if count == 0:
@@ -130,85 +134,31 @@ def convert2line(extX, extY, X, narray=False):
         dif = (next_point - current_point) / dis
         for k in range(0, dis):
             val = current_point + k * dif
-            if narray:
-                val = float(val)
             result.append(round(val, 2))
 
 
-def find_all(X, Y, appro_size):
-    result_setX = []
-    result_setY = []
-    for offset in range(0, appro_size):
-        # print(f"offset:{offset}")
-        extX, extY = find_localminmax(X, Y, appro_size, offset)
-        if len(result_setX) == 0:
-            print(f"offset:{offset}")
-            result_setX.append(extX)
-            result_setY.append(extY)
-            # print("branch1")
-            # print(result_setX[0])
-        else:
-            # print("branch2")
-
-            flag = False
-            for i in range(len(result_setX)):
-                result_setX[i] = np.array(result_setX[i])
-                result_setY[i] = np.array(result_setY[i])
-                extX = np.array(extX)
-                extY = np.array(extY)
-                # print(result_setX[i])
-                # print(extX)
-                # print((result_setX[i] == extX))
-                # print((result_setX[i] == extX).all())
-                if (len(result_setX[i]) != len(extX)):
-                    continue
-                if (result_setX[i] == extX).all():
-                    flag = True
-                    break
-            if not flag:
-                print(f"offset:{offset}")
-                result_setX.append(extX)
-                result_setY.append(extY)
-
-    return result_setX, result_setY
-
-
 if __name__ == '__main__':
-    size = 100
-    appro_size = 5
-    interval = '1d'
-    year = '21'
-    month = '05'
-    day = '26'
+    size = 150
+    interval = '1h'
+    year = '22'
+    month = '07'
+    day = '29'
 
-    X, Y = set_data(get=False, size=size, interval=interval, year=year, month=month, day=day)
+    X, Y = set_data(get=True, size=size, interval=interval, year=year, month=month, day=day)
+
+    appro_size = 3
+    extX, extY = find_localminmax(X, Y, appro_size)
+    print(extX)
+    print(extY)
 
     data = pd.read_csv(f'data/csv/20{year}-{month}-{day}_{size}_{interval}.csv', index_col=0, parse_dates=True)
     data.index.name = 'Date'
 
-    # --draw one solution
-    # extX, extY = find_localminmax(X, Y, size=appro_size, offset=2)
-    # apd = mpf.make_addplot(convert2line(extX, extY, X))
-    # mpf.plot(data, type='candle', volume=True, addplot=apd)
+    apd = mpf.make_addplot(convert2line(extX, extY, X))
+    mpf.plot(data, type='candle', volume=True, addplot=apd)
 
-    # --draw all possible solution
-    extX, extY = find_all(X, Y, appro_size)
-    for i in range(len(extX)):
-        print(len(convert2line(extX[i], extY[i], X)))
-        apd = mpf.make_addplot(convert2line(extX[i], extY[i], X))
-        mpf.plot(data, type='candle', volume=True, addplot=apd)
-
-    print(extX)
-    print(extY)
-
-    # extX = np.array([extX, extY])
-    # extX = extX.reshape(-1, 2)
-    # print(extX)
+    # mpf.plot(data, type='candle', mav=(3, 6, 9), volume=True)
 
     # plt.plot(X, Y[0, :], "-")
     # plt.plot(extX, extY, "-o")
-    # plt.show()
-
-    # plt.plot(np.arange(0, 542), convert2line(extX[0], extY[0], X), "-")
-    # plt.plot(extX[0], extY[0], "-o")
     # plt.show()
