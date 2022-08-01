@@ -174,12 +174,12 @@ def find_all(X, Y, appro_size):
 
 
 if __name__ == '__main__':
-    size = 100
+    size = 2000
     appro_size = 5
-    interval = '1d'
-    year = '21'
-    month = '05'
-    day = '26'
+    interval = '1h'
+    year = '22'
+    month = '08'
+    day = '01'
 
     X, Y = set_data(get=False, size=size, interval=interval, year=year, month=month, day=day)
 
@@ -187,16 +187,16 @@ if __name__ == '__main__':
     data.index.name = 'Date'
 
     # --draw one solution
-    # extX, extY = find_localminmax(X, Y, size=appro_size, offset=2)
-    # apd = mpf.make_addplot(convert2line(extX, extY, X))
-    # mpf.plot(data, type='candle', volume=True, addplot=apd)
+    extX, extY = find_localminmax(X, Y, size=appro_size, offset=2)
+    apd = mpf.make_addplot(convert2line(extX, extY, X))
+    mpf.plot(data, type='candle', volume=True, addplot=apd)
 
     # --draw all possible solution
-    extX, extY = find_all(X, Y, appro_size)
-    for i in range(len(extX)):
-        print(len(convert2line(extX[i], extY[i], X)))
-        apd = mpf.make_addplot(convert2line(extX[i], extY[i], X))
-        mpf.plot(data, type='candle', volume=True, addplot=apd)
+    # extX, extY = find_all(X, Y, appro_size)
+    # for i in range(len(extX)):
+    #     print(len(convert2line(extX[i], extY[i], X)))
+    #     apd = mpf.make_addplot(convert2line(extX[i], extY[i], X))
+    #     mpf.plot(data, type='candle', volume=True, addplot=apd)
 
     print(extX)
     print(extY)

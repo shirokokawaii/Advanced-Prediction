@@ -151,7 +151,7 @@ if __name__ == '__main__':
     extX, extY = find_localminmax(X, Y, size=appro_size, offset=0)
 
     # find value range
-    float_range = 0.7
+    float_range = 0.5
     setMax, setMin = bisect(split_interval(extX, extY, float_range))
     k1, b1 = fit_line(setMax)
     k2, b2 = fit_line(setMin)
