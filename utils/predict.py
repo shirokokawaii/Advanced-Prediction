@@ -1,18 +1,13 @@
 import cv2
 import numpy as np
-import pandas as pd
 from random import *
-from bayes_opt import BayesianOptimization
-
-from matplotlib import pyplot as plt
-from regex import W
 
 np.set_printoptions(suppress=True)
 
 
 # **time,high,low,open,volumefrom,volumeto,close**
 
-def calculate_trend(data, days):
+def calculate_trend(data):
     price = []
     xdata = []
     ydata = []
@@ -55,7 +50,7 @@ class predictNetwort:
 class Trend(object):
     def __init__(self, data, days):
         data = data[-days:, :]
-        self.values = calculate_trend(data, days)
+        self.values = calculate_trend(data)
 
 
 class Predict(object):

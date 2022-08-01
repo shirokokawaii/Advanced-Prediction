@@ -113,7 +113,7 @@ def get_slice(Y, slice_size, offset=0):
     return slideX, slideY
 
 
-def convert2line(extX, extY, X):
+def convert2line(extX, extY, X, narray=False):
     result = []
     for count in range(0, len(extX)):
         if count == 0:
@@ -130,6 +130,8 @@ def convert2line(extX, extY, X):
         dif = (next_point - current_point) / dis
         for k in range(0, dis):
             val = current_point + k * dif
+            if narray:
+                val = float(val)
             result.append(round(val, 2))
 
 
