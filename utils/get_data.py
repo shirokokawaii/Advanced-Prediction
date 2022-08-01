@@ -28,17 +28,14 @@ def get_data(interval, size, end, filename=""):
     return hist
 
 
-def convert2csv(hist_data, save=False, filename=""):
+def convert2csv(hist_data):
     np_to_csv = pd.DataFrame(data=hist_data)
-    np_to_csv.to_csv(f"../MEGA/DATA.csv")
     index = [0, 3, 1, 2, 6, 4]
     np_to_csv = np_to_csv[index]
     np_to_csv = np_to_csv.rename(columns={0: 'Date', 3: 'Open', 1: 'High', 2: 'Low', 6: 'Close',
                                           4: 'Volume'})
     np_to_csv['Date'] = pd.to_datetime(np_to_csv['Date'], unit='s')
     np_to_csv = np_to_csv.set_index('Date')
-    if save:
-        np_to_csv.to_csv(f"../MEGA/{filename}.csv")
     return np_to_csv
 
 
@@ -68,11 +65,18 @@ def set_data(get=False, size="2000", interval="1d", year="18", month='07', day='
     # print(type(Y))
     return X, Y
 
+def read_data(start, end, interval=1, type="1h"):
+    data = np.load(f"{DIR}{type}.npy")
+    result = []
+    for i in range(start, end, interval):
+        result.append(data[i])
+    return result
+
 
 if __name__ == "__main__":
     size = 2000
     # appro_size = 5
-    interval = '1h'
+    interval = '1d'
     year = '22'
     month = '08'
     day = '01'
@@ -89,7 +93,7 @@ if __name__ == "__main__":
     # print(current_hour)
     # print(i)
 
-    n = 50
+    n = 2
 
     for i in range(0, n):
         i = n - i

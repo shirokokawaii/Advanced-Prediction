@@ -1,3 +1,4 @@
-print(range(2, 0))
-for i in range(2, 0):
-    print(i)
+from utils.get_data import read_data, convert2csv
+
+data = read_data(1, 10, 2, "1d")
+print(convert2csv(data))
