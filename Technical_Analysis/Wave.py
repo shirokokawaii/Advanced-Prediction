@@ -23,7 +23,10 @@ def wave_fit(year, month, day, size, appro_size, interval):
     mpf.plot(data, type='candle', volume=True, addplot=apd)
     return extX, extY
 
-def k_predict(range, appro_size, interval, year, month, day):
+def k_predict(range, appro_size, interval, date:datetime):
+    year = date.strftime('%y')
+    month = date.strftime('%m')
+    day = date.strftime('%d')
     # trainer = []
     k = []
     Key_X, Key_Y =wave_fit(year, month, day, range, appro_size, interval)# Key points, X = time, Y = price
@@ -52,17 +55,10 @@ def k_predict(range, appro_size, interval, year, month, day):
 
 if __name__ == '__main__':
     now = datetime.datetime.now()
-    range = 200
     appro_size = 4
-    interval = '1h' #1m, 1h, 1d
-    year = now.strftime('%y')
-    month = now.strftime('%m')
-    day = now.strftime('%d')
-    # year = '22'
-    # month = '07'
-    # day = '29'
-
-    k = k_predict(range, appro_size, interval, year, month, day)
+    interval = '1d' #1m, 1h, 1d
+    print(now)
+    k = k_predict(range, appro_size, interval, now)
     print(k)
 
 #     # *****************test code：train model data from 2010 to 2020
