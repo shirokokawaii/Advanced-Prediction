@@ -1,41 +1,39 @@
-from random import randint
-
-import joblib
-from numpy import hstack
-# from cv2 import DIST_L2
-from wave_fit import *
-from sklearn.neighbors import KNeighborsClassifier
 import datetime
+import wave
 # import cv2
+import joblib
+import numpy as np
+import pandas as pd
+from random import randint
+import mplfinance as mpf
+# from cv2 import DIST_L2
+from wave_fit import find_localminmax, convert2line
+from get import get_data, set_data
+from sklearn.neighbors import KNeighborsClassifier
+
 
 # class wave_fit(object):
-def wave_fit(year, month, day, size, appro_size, interval):
-    X, Y = set_data(get=True, size=size, interval=interval, year=year, month=month, day=day)
+def wave_fit(start_date:datetime, end_date:datetime, interval:str, appro_size:int):
+    data_raw = get_data(start_date, end_date, interval)
+    X, Y = set_data(data_raw)
     data = []    # data: [0, 3, 9], [1, 4, 10]... [time, lowest, highest]
     for element in X:
         data.append([element, Y[2,element], Y[1,element]])
     extX, extY = find_localminmax(X, Y, appro_size)
+    data = np.array(data)
+    return extX, extY, data
 
-    data = pd.read_csv(f'data/csv/20{year}-{month}-{day}_{size}_{interval}.csv', index_col=0, parse_dates=True)
-    data.index.name = 'Date'
-
-    apd = mpf.make_addplot(convert2line(extX, extY, X))
-    mpf.plot(data, type='candle', volume=True, addplot=apd)
-    return extX, extY
-
-def k_predict(range, appro_size, interval, date:datetime):
-    year = date.strftime('%y')
-    month = date.strftime('%m')
-    day = date.strftime('%d')
-    # trainer = []
+def k_predict(start_date:datetime, end_date:datetime, interval:str, appro_size:int):
     k = []
-    Key_X, Key_Y =wave_fit(year, month, day, range, appro_size, interval)# Key points, X = time, Y = price
+    Key_X, Key_Y, data =wave_fit(start_date, end_date, interval, appro_size)# Key points, X = time, Y = price
     if(len(Key_X) > 3):
+        diff = 0
         for num1 in (-1, -2, -3, -4):
             # if(Key_Y[num1] > Key_Y[num1-1]):
                 # for num2 in range(Key_X[num1-1], Key_X[num1]+1):
                 #     trainer.append([num2, data[num2, 1]])
             k.append((Key_Y[num1-1]-Key_Y[num1])/(Key_X[num1-1]-Key_X[num1]))
+            diff += abs(Key_X[num1-1]-Key_X[num1])
             # else:
                 # for num2 in range(Key_X[num1-1], Key_X[num1]+1):
                 #     trainer.append([num2, data[num2, 0]])
@@ -51,80 +49,84 @@ def k_predict(range, appro_size, interval, date:datetime):
             # k.append(k_tem)
     else:
         print('Not enourgh data length')
-    return k
+    diff = diff/4
+    knn = joblib.load('model/knn_predict_trend.pkl')
+    k = np.array(k).reshape(1, -1)
+    res = knn.predict(k)
+    return res, diff
+
+def train_model(start:datetime, end:datetime, interval:str, appro_size:int):
+    X, Y, data = wave_fit(start, end, interval, appro_size)
+    size = len(X)
+    k = []
+    note = []
+    diff = 0
+    print('training model')
+    for i in range(5, size-5):
+        k_tem = []
+        for num1 in (i-1, i-2, i-3, i-4):
+            k_tem.append((Y[num1-1]-Y[num1])/(X[num1-1]-X[num1]))
+            diff += abs(X[num1-1]-X[num1])
+        k.append(k_tem)
+        diff = int(diff/4)
+        y = (data[X[i],1]+data[X[i],2])/2
+        x = X[i]
+        y_next = (data[X[i]+diff,1]+data[X[i]+diff,2])/2
+        x_next = x+diff
+        actual_k = (y_next -y)/(x_next - x)
+        trend = 0
+        if(actual_k > 0):
+            trend = 1
+        if(actual_k < 0):
+            trend = -1
+        note.append(trend)
+    # print(k)
+    # print(note)
+    knn = KNeighborsClassifier()
+    knn.fit(k,note)
+    joblib.dump(knn,'model/knn_predict_trend.pkl')
+    print('model saved')
+
+def test_model(start:datetime, end:datetime, interval:str, appro_size:int):
+    X, Y, data = wave_fit(start, end, interval, appro_size)
+    size = len(X)
+    k = []
+    note = []
+    diff = 0
+    knn = joblib.load('model/knn_predict_trend.pkl')
+    for i in range(5, size-5):
+        k_tem = []
+        for num1 in (i-1, i-2, i-3, i-4):
+            k_tem.append((Y[num1-1]-Y[num1])/(X[num1-1]-X[num1]))
+            diff += abs(X[num1-1]-X[num1])
+        k.append(k_tem)
+        diff = int(diff/4)
+        y = (data[X[i],1]+data[X[i],2])/2
+        x = X[i]
+        y_next = (data[X[i]+diff,1]+data[X[i]+diff,2])/2
+        x_next = x+diff
+        actual_k = (y_next -y)/(x_next - x)
+        trend = 0
+        if(actual_k > 0):
+            trend = 1
+        if(actual_k < 0):
+            trend = -1
+        note.append(trend)
+    print('Test score:{:.2f}'.format(knn.score(k,note)))
 
 if __name__ == '__main__':
-    now = datetime.datetime.now()
+    end = datetime.datetime.now()
+    start = end - datetime.timedelta(days=50)
     appro_size = 4
-    interval = '1d' #1m, 1h, 1d
-    print(now)
-    k = k_predict(range, appro_size, interval, now)
-    print(k)
+    interval = '1d' #1h, 4h, 1d
 
-#     # *****************test code：train model data from 2010 to 2020
+    # k, days = k_predict(start, end, interval, appro_size)
+    # print(k,'for',days,'days')
 
-    # X = []
-    # Y = []
-    # start = datetime.date(2015,1,1)
-    # end = datetime.date(2021,1,1)
-    # delta = start.__rsub__(end).days * 24
-    # times = delta//1000 + 1
-    # range = 1000
-    # range_final = delta%1000
-    # count = 0
-    # while(count <times):
-    #     # Key_X_tem, Key_Y_tem = wave_fit(year, month, day, range, appro_size, interval)# Key points, X = time, Y = price
-    #     start += datetime.timedelta(hours=1000)
-    #     year = start.strftime('%y')
-    #     month = start.strftime('%m')
-    #     day = start.strftime('%d')
-    #     print('year=',year)
-    #     if(count == times-1 ):
-    #         year = end.strftime('%y')
-    #         month = end.strftime('%m')
-    #         day = end.strftime('%d')
-    #         range = range_final
-    #     # X_tem, Y_tem = set_data(get=True, size=range, interval=interval, year=year, month=month, day=day)
-    #     Key_X, Key_Y, data = wave_fit(year, month, day, range, appro_size, interval)
-    #     data_k = []
-    #     note = []
-    #     print('training')
-    #     count = 50
-    #     while(count < len(Key_X)-50):
-    #         if(count%300 == 0):
-    #             print(count)
-    #         train_k = []
-    #         num1 = count-1
-    #         while (num1 > count-5):
-    #             train_k.append((Key_Y[num1-1]-Key_Y[num1])/(Key_X[num1-1]-Key_X[num1]))
-    #             num1 -= 1
-    #         actual_K = (data[0,Key_X+6] - Key_Y[count]) / (Key_X+6 - Key_X[count])
-    #         trend = 0
-    #         if(actual_K > 0):
-    #             trend = 1
-    #         if(actual_K < 0):
-    #             trend = -1
-    #         count += 1
-    #         data_k.append(train_k)
-    #         note.append(trend)
-
-    #     wave_fit_model = KNeighborsClassifier()
-    #     wave_fit_model.fit(data_k,note)
-    #     joblib.dump(wave_fit_model,'model/wave_fit.pkl')
-    #     # print('year=',year)
-    #     # counter = 0
-    #     # while(counter < len(X_tem)):
-    #     #     X_tem[counter] += count*range
-    #     #     counter += 1
-    #     # for element in X_tem:
-    #     #     X.append(element)
-    #     # print(X)
-    #     # print(Y)
-    #     # Y = np.append(Y_tem,axis=1)
-    #     # count += 1
-
-    # # X = np.load('data/X.npy')
-    # # Y = np.load('data/Y.npy')
-    # print(Y)
-
+    start = datetime.datetime(2010,1,12)
+    end = datetime.datetime(2022,1,12)
+    # train_model(start, end, interval, appro_size)
+    start = datetime.datetime(2022,1,12)
+    end = datetime.datetime(2022,7,12)
+    # test_model(start, end, interval, appro_size)
 

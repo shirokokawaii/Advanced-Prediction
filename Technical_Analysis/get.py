@@ -8,7 +8,7 @@ import requests
 import numpy as np
 
 
-def get_data(interval:str, start:datetime.date, end:datetime.date, save_file=bool(0)):
+def get_data(start:datetime.date, end:datetime.date, interval:str, save_file=bool(True)):
     # set api and argument
     endpoint =  {'1d': 'https://min-api.cryptocompare.com/data/v2/histoday?',
                 '1h': 'https://min-api.cryptocompare.com/data/v2/histohour?',
@@ -31,8 +31,8 @@ def get_data(interval:str, start:datetime.date, end:datetime.date, save_file=boo
     end_day = end.strftime('%d')
     end_hour = end.strftime('%H')
 
-    start_time = str(start_year+'-'+start_month+'-'+start_day+start_hour)
-    end_time = str(end_year+'-'+end_month+'-'+end_day+end_hour)
+    start_time = str(start_year + start_month+'-'+start_day+start_hour)
+    end_time = str(end_year + end_month+'-'+end_day+end_hour)
 
     size = 2000
     times = intdelta[interval]//2000 + 1
@@ -44,50 +44,64 @@ def get_data(interval:str, start:datetime.date, end:datetime.date, save_file=boo
     data = []
 
     # check if data existed
-    # if(os.path.exists(DIR + start_time + '_' + interval + '_' + end_time + '.npy')):
-    #     data = np.load(DIR + start_time + '_' + interval + '_' + end_time +'.npy')
-    #     data = pd.DataFrame(data)
-    #     return(data)
+    if(os.path.exists(DIR + start_time + '_' + interval + '_' + end_time + '.npy')):
+        print('Data already exist')
+        data = np.load(DIR + start_time + '_' + interval + '_' + end_time + '.npy')
+        data = pd.DataFrame(data)
+        return(data)
 
     # get data from api
+    print('Requesting data')
     for i in range(times):
         start += timedelta[interval]
         Ts = time.mktime(time.strptime(f"{start.strftime('20%y-%m-%d %H:%M:%S')}", "%Y-%m-%d %H:%M:%S"))
         if(i+1 == times):
             res = requests.get(endpoint[interval] + 'fsym=ETH&tsym=USD&limit=' + str(final_range) + "&toTs=" + str(int(Ts)))
-            data += json.loads(res.content)['Data']['Data']
+            data_tem = json.loads(res.content)['Data']['Data']
+            data += data_tem[1:]
             break
         res = requests.get(endpoint[interval] + 'fsym=ETH&tsym=USD&limit=' + str(size) + '&toTs=' + str(int(Ts)))
-        data += json.loads(res.content)['Data']['Data']
+        res = requests.get(endpoint[interval] + 'fsym=ETH&tsym=USD&limit=' + str(final_range) + "&toTs=" + str(int(Ts)))
+        data_tem = json.loads(res.content)['Data']['Data']
+        data += data_tem[1:]
 
     # save data into file
     hist = pd.DataFrame(data)
     hist.drop(["conversionType", "conversionSymbol"], axis='columns', inplace=True)
     if(save_file):
         np.save(DIR + start_time + '_' + interval + '_' + end_time, hist)
-    return hist
+    data = np.load(DIR + start_time + '_' + interval + '_' + end_time + '.npy')
+    data = pd.DataFrame(data)
+    print('Finished')
+    return(data)
+
+def set_data(data):
+    close = data[3].values
+    X = np.arange(0, close.size)
+    Y = np.concatenate((data[3].values, data[1].values, data[2].values), axis=0)
+    Y = Y.reshape(3, int((len(Y) + 2) / 3))
+    return X, Y
 
 # test code
 if __name__ == '__main__':
-    start = datetime.datetime(2021,1,12,12)
-    end = datetime.datetime(2021,1,14,12)
-    data = get_data('1d', start, end)
+    start = datetime.datetime(2021,1,12,12)# 2021-01-12 12:00
+    end = datetime.datetime(2021,1,15,12)# 2021-01-15 12:00
+    data = get_data(start, end, '1d', bool(False))
     print(data)
+    X,Y = set_data(data)
+    print(X, Y)
 
 #return example:
 # hist = Object{
-#   time: 1658707200
-#   high: 22660.92
-#   low: 21268.28
-#   open: 22585.4
-#   volumefrom: 42928.78
-#   volumeto: 940453686.83
-#   close: 21305.59}
+#   0:time: 1658707200
+#   1:high: 22660.92
+#   2:low: 21268.28
+#   3:open: 22585.4
+#   4:volumefrom: 42928.78
+#   5:volumeto: 940453686.83
+#   6:close: 21305.59}
 
 #file example:
 # 19-01-1212_1d_19-05-2712.npy
 # {19:start_year - 01:start_month - 12:start_day 21:start_hour _
 # 1d:interval _ 19:end_year - 05:end_month - 27:end_day 21:end_hour}
-
-#TimeFrom: 1659499200
-# TimeTo: 1659520800

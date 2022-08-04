@@ -22,6 +22,7 @@ import time
 # #读取模型
 # clf_new = joblib.load('model/rfc.pkl')
 # res = clf_new.predict([[6.75,9.82]])
-# print(res)
+data = [1,2,3,4]
+print(data[1:])
 
 print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(1659513600)))

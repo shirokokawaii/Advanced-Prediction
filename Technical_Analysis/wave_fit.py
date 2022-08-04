@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 import mplfinance as mpf
-
+import sys
+sys.setrecursionlimit(100000)
 from get_data import set_data
 
 
