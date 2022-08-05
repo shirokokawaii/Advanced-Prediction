@@ -68,9 +68,10 @@ def get_data(start:datetime.date, end:datetime.date, interval:str, save_file=boo
     # save data into file
     hist = pd.DataFrame(data)
     hist.drop(["conversionType", "conversionSymbol"], axis='columns', inplace=True)
-    if(save_file):
-        np.save(DIR + start_time + '_' + interval + '_' + end_time, hist)
+    np.save(DIR + start_time + '_' + interval + '_' + end_time, hist)
     data = np.load(DIR + start_time + '_' + interval + '_' + end_time + '.npy')
+    if(save_file == bool(False)):
+        os.remove(DIR + start_time + '_' + interval + '_' + end_time + '.npy')
     data = pd.DataFrame(data)
     print('Finished')
     return(data)
@@ -84,10 +85,12 @@ def set_data(data):
 
 # test code
 if __name__ == '__main__':
-    start = datetime.datetime(2021,1,12,12)# 2021-01-12 12:00
-    end = datetime.datetime(2021,1,15,12)# 2021-01-15 12:00
+    start = datetime.datetime(2021,1,12)# 2021-01-12 12:00
+    end = datetime.datetime(2021,1,20)# 2021-01-15 12:00
     data = get_data(start, end, '1d', bool(False))
+    data = data[:3]
     print(data)
+    print(len(data))
     X,Y = set_data(data)
     print(X, Y)
 
